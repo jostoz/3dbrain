@@ -48,5 +48,6 @@ module.exports = {
     quotes: "off",
     "class-methods-use-this": "off",
     "function-paren-newline": "off",
+    'linebreak-style': 'off', // This turns off the linebreak-style rule
   },
 };
