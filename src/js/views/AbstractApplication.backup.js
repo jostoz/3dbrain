@@ -39,7 +39,7 @@ class AbstractApplication {
     // Controls setup
     this.orbitControls = new OrbitControls(this.a_camera, this.a_renderer.domElement);
     this.orbitControls.enableDamping = true;
-    this.container.appendChild(this.a_renderer.domElement);
+    this.this.container.appendChild(this.a_renderer.domElement);
     
     // Post-processing setup
     this.composer = new EffectComposer(this.a_renderer);
