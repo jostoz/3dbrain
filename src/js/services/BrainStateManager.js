@@ -9,6 +9,15 @@ export const BrainState = {
     ERROR: 'ERROR'
 };
 
+// URLs de prueba para cada memoria
+export const MemoryUrls = {
+    analytic: '/demo/analytic',
+    episodic: '/demo/episodic',
+    process: '/demo/process',
+    semantic: '/demo/semantic',
+    affective: '/demo/affective'
+};
+
 export const MemoryState = {
     INACTIVE: 'INACTIVE',
     ACTIVE: 'ACTIVE',
@@ -47,7 +56,8 @@ export class BrainStateManager extends EventEmitter {
                 active: new Map(),
                 selected: null,
                 highlighted: null,
-                history: []
+                history: [],
+                targetUrl: null // Nueva propiedad para la URL de destino
             },
             transition: {
                 active: false,
@@ -197,10 +207,21 @@ export class BrainStateManager extends EventEmitter {
         });
 
         if (target) {
+            // Obtener la URL correspondiente a la memoria seleccionada
+            const targetUrl = MemoryUrls[target] || null;
+            
             this.updateState('memory', {
                 selected: target,
-                history: [...this.state.memory.history, target]
+                history: [...this.state.memory.history, target],
+                targetUrl
             });
+
+            // Si hay una URL definida, redirigir después de un pequeño delay
+            if (targetUrl) {
+                setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, 1000); // 1 segundo de delay para permitir que las animaciones terminen
+            }
         }
     }
 } 
