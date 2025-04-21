@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import 'three/examples/js/loaders/OBJLoader';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader.js';
 
 class Loaders {
     constructor(startAnimation) {
@@ -49,7 +50,7 @@ class Loaders {
     }
 
     loadOBJs() {
-        const loader = new THREE.OBJLoader(this.loadingManager);
+        const loader = new OBJLoader(this.loadingManager);
         this.models.forEach((m, i) => {
             loader.load(`static/models/${m}`, (model) => {
                 this.setModel(model, i);
@@ -87,7 +88,7 @@ class Loaders {
     }
 
     loadFont() {
-        const fontLoader = new THREE.FontLoader(this.loadingManager);
+        const fontLoader = new FontLoader(this.loadingManager);
         fontLoader.load('static/fonts/Roboto_Regular.json', (font) => {
             this.FONT = font;
         });
