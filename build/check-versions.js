@@ -1,7 +1,7 @@
-import chalk from 'chalk'
-import semver from 'semver'
-import { execSync } from 'node:child_process'
-import packageConfig from '../package.json' assert { type: 'json' }
+const chalk = require('chalk')
+const semver = require('semver')
+const { execSync } = require('node:child_process')
+const packageConfig = require('../package.json')
 
 const exec = cmd => execSync(cmd).toString().trim()
 
