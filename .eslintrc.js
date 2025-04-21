@@ -1,6 +1,6 @@
 // https://eslint.org/docs/user-guide/configuring
 
-module.exports = {
+export default {
   root: true,
   env: {
     browser: true,
