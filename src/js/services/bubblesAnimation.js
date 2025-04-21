@@ -6,10 +6,12 @@ import glowVertex from '../shaders/glow.vert';
 import glowFrag from '../shaders/glow.frag';
 import memoryMapping from '../data/memoryMaping.json';
 import testPayload from '../data/testPayload.json';
+import { TransitionState } from './BrainStateManager';
 
 class BubblesAnimation {
     constructor(mainBrain) {
         this.mainBrain = mainBrain;
+        this.stateManager = mainBrain.stateManager;
         this.isFlashing = false;
         this.memorySelected = mainBrain.memorySelected;
         this.isBubblesInserted = false;
@@ -213,10 +215,26 @@ class BubblesAnimation {
         const cameraPos = this.mainBrain.camera.position;
         const { target } = this.mainBrain.orbitControls;
         const bubblesAttr = this.bubbles.geometry.attributes.bubbles.array;
-        const progress = { p: 1.0 };
+
+        // Actualizar estado de memoria
+        if (payload.winner) {
+            this.stateManager.updateState('memory', {
+                selected: payload.winner
+            });
+        }
 
         this.isWinnerActive(false);
         this.mainBrain.font.removeText();
+
+        // Iniciar transición
+        this.stateManager.startTransition(
+            null,
+            payload.winner,
+            TransitionState.ZOOM_IN,
+            2500
+        );
+
+        const progress = { p: 1.0 };
         TweenMax.fromTo(progress, 2.5, { p: 1.0 }, {
             p: 0.0,
             ease: Power1.easeInOut,
@@ -229,7 +247,6 @@ class BubblesAnimation {
                 }
             },
             onComplete: () => {
-                // This function alter the bubblesAttr buffer
                 this.getBubblesSelected(bubblesAttr, payload);
                 this.bubbles.geometry.attributes.bubbles.needsUpdate = true;
                 this.animate(true);

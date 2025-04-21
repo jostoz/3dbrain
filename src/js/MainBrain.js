@@ -10,10 +10,15 @@ import GUI from "./services/gui";
 import Font from "./services/font";
 import ParticleSystem from "./services/particlesSystem";
 import Memories from "./data/memories.json";
+import { BrainStateManager, BrainState } from "./services/BrainStateManager";
 
 class MainBrain extends AbstractApplication {
   constructor() {
     super();
+
+    // Inicializar el gestor de estados
+    this.stateManager = new BrainStateManager();
+    this.stateManager.attachToMainBrain(this);
 
     this.clock = new THREE.Clock();
     this.addBrain = this.addBrain.bind(this);
@@ -35,6 +40,12 @@ class MainBrain extends AbstractApplication {
     this.frame = 0;
     this.frameName = 0;
     this.isRecording = false;
+
+    // Iniciar en estado LOADING
+    this.stateManager.updateState('brain', {
+      current: BrainState.LOADING
+    });
+
     setTimeout(() => {
       this.startIntro();
     }, 1000);
@@ -113,6 +124,10 @@ class MainBrain extends AbstractApplication {
   }
 
   startIntro() {
+    this.stateManager.updateState('brain', {
+      current: BrainState.TRANSITIONING
+    });
+
     const progress = { p: 1000 };
     TweenMax.fromTo(
       progress,
@@ -123,13 +138,22 @@ class MainBrain extends AbstractApplication {
         ease: Power4.easeInOut,
         onUpdate: () => {
           this.camera.position.z = progress.p;
+          this.stateManager.updateState('camera', {
+            position: {
+              x: this.camera.position.x,
+              y: this.camera.position.y,
+              z: this.camera.position.z
+            }
+          });
         },
         onStart: () => {
           this.particlesSystem.transform(true);
         },
         onComplete: () => {
-          //hide xray
           this.particlesSystem.xRay.material.uniforms.c.value = 1.0;
+          this.stateManager.updateState('brain', {
+            current: BrainState.READY
+          });
           this.startAutoDemo();
         }
       }
@@ -140,14 +164,11 @@ class MainBrain extends AbstractApplication {
     let memoryCount = 1;
     this.scene.add(this.particlesSystem.xRay);
     let memoryTimer;
-    const me = this;
+    
     setTimeout(() => {
-      //enable xRay Animation
       this.particlesSystem.isXRayActive(true);
       setTimeout(() => {
-        //remove animation
         this.particlesSystem.isXRayActive(false);
-        //Enable Memories
         memoryTimer = setInterval(() => {
           if (memoryCount < 5) {
             this.bubblesAnimation.updateSubSystem(memoryCount);
@@ -201,9 +222,6 @@ class MainBrain extends AbstractApplication {
     this.thinkingAnimation = new ThinkingAnimation(this);
     this.thinkingAnimation.initAnimation();
 
-    // Set Background
-    //this.scene.background = this.loaders.assets.get('sky');
-
     this.animate();
   }
 
@@ -212,6 +230,9 @@ class MainBrain extends AbstractApplication {
     this.orbitControls.autoRotateSpeed = this.gui.controls.rotationSpeed;
 
     this.deltaTime += this.clock.getDelta();
+
+    // Actualizar progreso de transición si está activa
+    this.stateManager.updateTransitionProgress();
 
     this.particlesSystem.update(
       this.deltaTime,
@@ -224,15 +245,12 @@ class MainBrain extends AbstractApplication {
     this.stats.update();
     requestAnimationFrame(this.animate.bind(this));
 
-    //this.renderer.render(this.a_scene, this.a_camera);
-
     this.font.facingToCamera(this.camera);
     this.camera.updateProjectionMatrix();
 
     this.thinkingAnimation.flashing.geometry.verticesNeedUpdate = true;
     this.thinkingAnimation.flashing.geometry.attributes.position.needsUpdate = true;
 
-    // composer
     this.composer.render();
 
     if (this.isRecording) {

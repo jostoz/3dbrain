@@ -1,38 +1,38 @@
 uniform vec3 glowColor;
-varying float intensity;
-varying float alpha;
-uniform float uFlashingAlpha;
-uniform bool uIsFlashing;
+uniform float c;
+uniform float p;
+uniform float uTime;
+uniform float uTransitionProgress;
+
+varying vec3 vColor;
+varying float vAlpha;
 varying vec4 vBubbles;
 varying vec4 vMemory;
-uniform bool isWinnerActive;
-uniform float uWinnerSelected;
-void main()
-{
 
-        float distanceToCenter = distance(gl_PointCoord, vec2(0.5));
-        float pct = 1.0 - smoothstep(0.0, 0.5, distanceToCenter);
-        vec3 color = vec3(1.0) * gl_FragColor.rgb;
+void main() {
+    float r = 0.0;
+    vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+    r = dot(cxy, cxy);
 
-        vec3 glow = glowColor * intensity;
-        if(vBubbles.w == 3.0){ //Winner Bubble
-            // glow = vec3(0.0,0.9,0.0) * intensity;
-        }
+    if (r > 1.0) {
+        discard;
+    }
 
-        if(alpha == 5.0) {
-            //discard;
-        }
+    // Efecto de transición
+    vec3 finalColor = glowColor;
+    float finalAlpha = vAlpha;
 
-        gl_FragColor = vec4(glow, clamp(alpha, 0.0, 1.0));
-        gl_FragColor = vec4(glow, pct * gl_FragColor.a);
+    if (uTransitionProgress > 0.0) {
+        // Efecto de color durante la transición
+        finalColor = mix(glowColor, vec3(1.0), uTransitionProgress);
+        
+        // Efecto de brillo durante la transición
+        float glow = (1.0 - r) * (1.0 + uTransitionProgress);
+        finalAlpha = mix(vAlpha, glow, uTransitionProgress);
+    }
 
-        if(uIsFlashing){
-             gl_FragColor = vec4(glow, pct * gl_FragColor.a * uFlashingAlpha);
-        }
-
-        //Show only the brain section activate
-        if(vMemory.w == uWinnerSelected && isWinnerActive){
-            gl_FragColor += vec4(glow,pct * gl_FragColor.a);
-        }
-
+    // Aplicar efectos de partículas
+    float intensity = pow((1.0 - r), c) * p;
+    
+    gl_FragColor = vec4(finalColor * intensity, finalAlpha);
 }
