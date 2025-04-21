@@ -29,7 +29,7 @@ void main() {
         // Efecto de brillo durante la transición
         float glow = (1.0 - r) * (1.0 + uTransitionProgress);
         finalAlpha = mix(vAlpha, glow, uTransitionProgress);
-    }
+        }
 
     // Aplicar efectos de partículas
     float intensity = pow((1.0 - r), c) * p;

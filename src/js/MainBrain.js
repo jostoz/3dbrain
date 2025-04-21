@@ -82,18 +82,16 @@ class MainBrain extends AbstractApplication {
     this.spotLight.position.set(0, 500, -10);
     this.spotLight.castShadow = true;
 
-    this.spotLight.castShadow = true;
-    this.spotLight.shadow = new THREE.LightShadow(
-      new THREE.PerspectiveCamera(
-        54,
-        window.innerWidth / window.innerHeight,
-        1,
-        2000
-      )
-    );
+    // Configure shadow properties directly on the light
     this.spotLight.shadow.bias = -0.000222;
     this.spotLight.shadow.mapSize.width = 1024;
     this.spotLight.shadow.mapSize.height = 1024;
+
+    // Set up shadow camera parameters if needed
+    this.spotLight.shadow.camera.near = 1;
+    this.spotLight.shadow.camera.far = 2000;
+    this.spotLight.shadow.camera.fov = 54;
+    this.spotLight.shadow.camera.aspect = window.innerWidth / window.innerHeight;
 
     this.scene.add(this.spotLight);
     this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight);
@@ -231,7 +229,7 @@ class MainBrain extends AbstractApplication {
 
   animate(timestamp) {
     this.orbitControls.update();
-    this.orbitControls.autoRotateSpeed = this.gui.controls.rotationSpeed;
+    this.orbitControls.autoRotateSpeed = this.gui?.controls?.rotationSpeed;
 
     this.deltaTime += this.clock.getDelta();
 
@@ -259,8 +257,9 @@ class MainBrain extends AbstractApplication {
 
     if (this.isRecording) {
       if (this.frame > 10) {
+        this.frameName += 1;
         this.socket.emit("render-frame", {
-          frame: (this.frameName += 1),
+          frame: this.frameName,
           file: document.querySelector("canvas").toDataURL(),
         });
       }

@@ -6,13 +6,13 @@ const packageConfig = require('../package.json')
 const exec = cmd => execSync(cmd).toString().trim()
 
 function checkVersions() {
-  const versionRequirements = [
-    {
-      name: 'node',
+const versionRequirements = [
+  {
+    name: 'node',
       currentVersion: process.version,
-      versionRequirement: packageConfig.engines.node
-    }
-  ]
+    versionRequirement: packageConfig.engines.node
+  }
+]
 
   const versionNpm = exec('npm --version')
 

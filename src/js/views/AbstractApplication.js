@@ -18,8 +18,8 @@ class AbstractApplication {
     console.log('Container:', this.container);
     
     // Scene setup
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x440088); // Purple background
+    this.a_scene = new THREE.Scene();
+    this.a_scene.background = new THREE.Color(0x440088); // Purple background
     this.mouse = { x: 0, y: 0 };
 
     // Camera setup
@@ -47,12 +47,12 @@ class AbstractApplication {
     const debugGeometry = new THREE.BoxGeometry(1, 1, 1);
     const debugMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const debugCube = new THREE.Mesh(debugGeometry, debugMaterial);
-    this.scene.add(debugCube);
+    this.a_scene.add(debugCube);
     console.log('Debug cube added to scene');
     
     // Setup composer and effects
     this.composer = new EffectComposer(this.a_renderer);
-    const renderPass = new RenderPass(this.scene, this.a_camera);
+    const renderPass = new RenderPass(this.a_scene, this.a_camera);
     
     const bloomEffect = new BloomEffect({
       luminanceSmoothing: 0.0
@@ -67,7 +67,9 @@ class AbstractApplication {
     // Event listeners
     window.addEventListener('resize', this.onWindowResize.bind(this));
     window.addEventListener('mousemove', this.onMouseMove.bind(this));
+  }
 
+  startAnimation() {
     // Start animation loop
     this.animate();
   }
@@ -81,7 +83,7 @@ class AbstractApplication {
   }
 
   get scene() {
-    return this.scene;
+    return this.a_scene;
   }
 
   get blurScene() {
@@ -127,7 +129,7 @@ class AbstractApplication {
     this.orbitControls.update();
     
     // Add debug rotation for the cube
-    const debugCube = this.scene.getObjectByProperty('type', 'Mesh');
+    const debugCube = this.a_scene.getObjectByProperty('type', 'Mesh');
     if (debugCube) {
       debugCube.rotation.x += 0.01;
       debugCube.rotation.y += 0.01;

@@ -78,26 +78,26 @@ class ThinkingAnimation {
 
         if (this.alphaAnimation.v === 0.0) {
             gsap.to(this.alphaAnimation, {
-                v: 1.0,
+                    v: 1.0,
                 duration: 2.5,
                 ease: "power1.inOut",
-                onStart: () => {
-                    this.selectMemoryThinking(val);
-                },
-                onUpdate: () => {
-                    this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
+                    onStart: () => {
+                        this.selectMemoryThinking(val);
+                    },
+                    onUpdate: () => {
+                        this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
                 }
             });
         } else {
             gsap.to(this.alphaAnimation, {
-                v: 0.0,
+                    v: 0.0,
                 duration: 1.0,
                 ease: "power1.inOut",
-                onUpdate: () => {
-                    this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
-                },
-                onComplete: () => {
-                    this.thinkingFadeIn(val);
+                    onUpdate: () => {
+                        this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
+                    },
+                    onComplete: () => {
+                        this.thinkingFadeIn(val);
                 }
             });
         }
@@ -122,28 +122,28 @@ class ThinkingAnimation {
         this.flashing.material.uniforms.isCustomAlpha.value = true;
 
         gsap.to(this.mainBrain.camera.position, {
-            x: locations.camera.x,
-            y: locations.camera.y,
-            z: locations.camera.z,
+                x: locations.camera.x,
+                y: locations.camera.y,
+                z: locations.camera.z,
             duration: 1.5,
             ease: "power1.inOut",
-            onComplete: () => {
-                this.secuenceAnimation += 1;
-                this.animationCamera(this.secuenceAnimation);
+                onComplete: () => {
+                    this.secuenceAnimation += 1;
+                    this.animationCamera(this.secuenceAnimation);
             }
         });
     }
 
     thinkingFadeIn(val) {
         gsap.to(this.alphaAnimation, {
-            v: 1.0,
+                v: 1.0,
             duration: 2.5,
             ease: "power1.inOut",
-            onUpdate: () => {
-                this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
-            },
-            onStart: () => {
-                this.selectMemoryThinking(val);
+                onUpdate: () => {
+                    this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
+                },
+                onStart: () => {
+                    this.selectMemoryThinking(val);
             }
         });
     }
@@ -226,7 +226,7 @@ class ThinkingAnimation {
                 duration: 2.5,
                 ease: "power1.inOut",
                 onUpdate: () => {
-                    this.isFlashing = true;
+                        this.isFlashing = true;
                 }
             });
         } else {
@@ -235,7 +235,7 @@ class ThinkingAnimation {
                 duration: 2.5,
                 ease: "power1.inOut",
                 onUpdate: () => {
-                    this.isFlashing = false;
+                        this.isFlashing = false;
                 }
             });
         }
