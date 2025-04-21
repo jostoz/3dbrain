@@ -1,5 +1,5 @@
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["data"] }] */
-import * as BAS from 'three-bas';
+import * as BAS from 'three-bas/dist/bas.module.js';
 import * as THREE from 'three';
 import { Power1, TweenMax } from 'gsap';
 import Chuncks from './chunks';
