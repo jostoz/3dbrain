@@ -26,7 +26,7 @@
   },
   "engines": {
     "node": "18.x",
-    "npm": "8.x"
+    "npm": ">=8.x"
   },
   "dependencies": {
     "@superguigui/wagner": "^0.1.6",
