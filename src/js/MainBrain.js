@@ -1,6 +1,6 @@
-/* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["child", memories] }] */
+/* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["child", "memories"] }] */
 import * as THREE from "three";
-import { Power4, TweenMax } from "gsap";
+import { Power4, gsap } from "gsap";
 import "three/examples/js/BufferGeometryUtils";
 import AbstractApplication from "./views/AbstractApplication";
 import Loaders from "./Loaders/Loaders";
@@ -11,12 +11,16 @@ import Font from "./services/font";
 import ParticleSystem from "./services/particlesSystem";
 import Memories from "./data/memories.json";
 import { BrainStateManager, BrainState } from "./services/BrainStateManager";
+import { EventEmitter } from "./services/EventEmitter";
 
 class MainBrain extends AbstractApplication {
   constructor() {
     super();
 
-    // Inicializar el gestor de estados
+    // Initialize event emitter
+    this.events = new EventEmitter();
+    
+    // Initialize state manager
     this.stateManager = new BrainStateManager();
     this.stateManager.attachToMainBrain(this);
 
@@ -41,7 +45,7 @@ class MainBrain extends AbstractApplication {
     this.frameName = 0;
     this.isRecording = false;
 
-    // Iniciar en estado LOADING
+    // Start in LOADING state
     this.stateManager.updateState('brain', {
       current: BrainState.LOADING
     });
@@ -129,7 +133,7 @@ class MainBrain extends AbstractApplication {
     });
 
     const progress = { p: 1000 };
-    TweenMax.fromTo(
+    gsap.fromTo(
       progress,
       6.5,
       { p: 1000 },
