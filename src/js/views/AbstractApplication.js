@@ -1,8 +1,8 @@
 import * as THREE from "three";
 import io from "socket.io-client";
-import "three/examples/js/controls/OrbitControls";
-import "three/examples/js/modifiers/BufferSubdivisionModifier";
-import Stats from "three/examples/js/libs/stats.min";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { SubdivisionModifier } from "three/examples/jsm/modifiers/SubdivisionModifier";
+import Stats from "three/examples/jsm/libs/stats.module";
 import {
   EffectComposer,
   RenderPass,
@@ -11,87 +11,56 @@ import {
 } from "postprocessing";
 
 class AbstractApplication {
-  constructor() {
-    this.a_camera = new THREE.PerspectiveCamera(
-      50,
-      window.innerWidth / window.innerHeight,
-      1,
-      1000
-    );
-    this.a_camera.position.z = 1000;
-
+  constructor(container) {
+    this.container = container;
+    this.stats = AbstractApplication.initStats(container);
+    this.mouse = { x: 0, y: 0 };
+    
+    // Scene setup
     this.a_scene = new THREE.Scene();
-    this.a_scene.background = new THREE.Color("#a7b6d2");
-
     this.a_blurScene = new THREE.Scene();
     this.a_bloomScene = new THREE.Scene();
-
-    this.a_scene.fog = new THREE.Fog(0xa7b6d2, 300, 1300);
-
-    this.a_renderer = new THREE.WebGLRenderer({
-      antialias: true,
-      alpha: true,
-      preserveDrawingBuffer: false,
-      logarithmicDepthBuffer: true,
-    });
-    this.a_renderer.setPixelRatio(window.devicePixelRatio);
-    this.a_renderer.setSize(window.innerWidth, window.innerHeight);
-    this.a_renderer.sortObjects = false;
-    this.a_renderer.setClearColor(0x00000, 0.0);
-
-    this.a_renderer.shadowMap.enabled = true;
-    this.a_renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    this.a_renderer.gammaInput = true;
-    this.a_renderer.gammaOutput = true;
-    this.a_renderer.shadowDepthMaterialSide = THREE.BackSide;
-
-    this.composer = new EffectComposer(this.a_renderer, {
-      stencilBuffer: true,
-      depthTexture: true,
-    });
-
-    // PASSES
-    this.renderPass = new RenderPass(this.scene, this.camera);
-    //this.renderPass.renderToScreen = true;
-    this.composer.addPass(this.renderPass);
-
-
-    this.bloomPass = new BloomPass({
-      resolutionScale: 0.7,
-      resolution: 2.9,
-      intensity: 2.3,
-      distinction: 9.0,
-      blend: true,
-    });
-
-    this.bloomPass.renderToScreen = true;
-    this.composer.addPass(this.bloomPass);
-
-    this.blurMask = new MaskPass(this.blurScene, this.camera);
-    this.renderPass2 = new RenderPass(this.blurScene, this.camera);
-
-    document.body.appendChild(this.a_renderer.domElement);
-
-    this.stats = AbstractApplication.initStats(document.body);
-
-    this.orbitControls = new THREE.OrbitControls(
-      this.camera,
-      this.a_renderer.domElement
+    
+    // Camera setup
+    this.a_camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
     );
+    this.a_camera.position.z = 5;
+    
+    // Renderer setup
+    this.a_renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.a_renderer.setSize(window.innerWidth, window.innerHeight);
+    this.a_renderer.setClearColor(0x000000);
+    this.a_renderer.outputColorSpace = THREE.SRGBColorSpace;
+    container.appendChild(this.a_renderer.domElement);
+    
+    // Controls setup
+    this.orbitControls = new OrbitControls(this.a_camera, this.a_renderer.domElement);
     this.orbitControls.enableDamping = true;
-    this.orbitControls.dampingFactor = 0.25;
-    this.orbitControls.enableZoom = true;
-    this.orbitControls.zoomSpeed = 0.1;
-    this.orbitControls.panSpeed = 0.1;
-    this.orbitControls.minDistance = 50;
-    this.orbitControls.maxDistance = 2500;
-    this.orbitControls.autoRotate = false;
-    this.orbitControls.autoRotateSpeed = 1.0;
-    this.orbitControls.rotateSpeed = 0.1;
-    this.orbitControls.screenSpacePanning = true;
-
-    window.addEventListener("resize", this.onWindowResize.bind(this), false);
-    window.addEventListener("mousemove", this.onMouseMove.bind(this), false);
+    this.orbitControls.dampingFactor = 0.05;
+    
+    // Post-processing setup
+    this.composer = new EffectComposer(this.a_renderer);
+    const renderPass = new RenderPass(this.a_scene, this.a_camera);
+    const bloomPass = new BloomPass({
+      intensity: 1.5,
+      kernelSize: 2,
+      luminanceThreshold: 0.85,
+      luminanceSmoothing: 0.0
+    });
+    
+    this.composer.addPass(renderPass);
+    this.composer.addPass(bloomPass);
+    
+    // Event listeners
+    window.addEventListener('resize', this.onWindowResize.bind(this));
+    window.addEventListener('mousemove', this.onMouseMove.bind(this));
+    
+    // Start animation loop
+    this.animate();
   }
 
   get renderer() {
@@ -113,27 +82,45 @@ class AbstractApplication {
     return this.a_bloomScene;
   }
 
-  static initStats(render) {
+  static initStats(container) {
     const stats = new Stats();
-    stats.setMode(0);
-    stats.domElement.style.position = "absolute";
-    stats.domElement.style.left = "0px";
-    stats.domElement.style.tip = "0px";
-    render.appendChild(stats.domElement);
+    stats.dom.style.position = "absolute";
+    stats.dom.style.left = "0px";
+    stats.dom.style.top = "0px";
+    container.appendChild(stats.dom);
     return stats;
   }
 
-  static onMouseMove(e) {}
   onWindowResize() {
-    this.a_camera.aspect = window.innerWidth / window.innerHeight;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    this.a_camera.aspect = width / height;
     this.a_camera.updateProjectionMatrix();
 
-    this.a_renderer.setSize(window.innerWidth, window.innerHeight);
+    this.a_renderer.setSize(width, height);
+    this.composer.setSize(width, height);
   }
 
-  animate(timestamp) {
+  onMouseMove(event) {
+    event.preventDefault();
+    this.mouse = {
+      x: (event.clientX / window.innerWidth) * 2 - 1,
+      y: -(event.clientY / window.innerHeight) * 2 + 1,
+    };
+  }
+
+  animate() {
     requestAnimationFrame(this.animate.bind(this));
-    this.a_renderer.render(this.a_scene, this.a_camera);
+
+    // Update controls
+    this.orbitControls.update();
+
+    // Update stats
+    this.stats.update();
+
+    // Render scene with post-processing
+    this.composer.render();
   }
 }
 
