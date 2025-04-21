@@ -33,3 +33,4 @@ a#magic-window {
     color: white;
     margin-top: 1em;
 }
+canvas { display: block; width: 100%; height: 100%; }

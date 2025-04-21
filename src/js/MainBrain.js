@@ -1,7 +1,7 @@
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["child", "memories"] }] */
 import * as THREE from "three";
 import { Power4, gsap } from "gsap";
-import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import AbstractApplication from "./views/AbstractApplication";
 import Loaders from "./Loaders/Loaders";
 import BubblesAnimation from "./services/bubblesAnimation";
@@ -15,10 +15,10 @@ import { EventEmitter } from "./services/EventEmitter";
 
 class MainBrain extends AbstractApplication {
   constructor() {
-    super();
-
-    // Initialize event emitter
-    this.events = new EventEmitter();
+    console.log('MainBrain constructor called');
+    const container = document.getElementById('container');
+    console.log('Container in MainBrain:', container);
+    super(container);
     
     // Initialize state manager
     this.stateManager = new BrainStateManager();
@@ -122,7 +122,7 @@ class MainBrain extends AbstractApplication {
       };
     });
 
-    this.endPointsCollections = BufferGeometryUtils.mergeBufferGeometries(
+    this.endPointsCollections = mergeBufferGeometries(
       this.brainBufferGeometries
     );
   }
@@ -282,8 +282,8 @@ class MainBrain extends AbstractApplication {
   }
 
   static getRandomPointOnSphere(r) {
-    const u = THREE.Math.randFloat(0, 1);
-    const v = THREE.Math.randFloat(0, 1);
+    const u = THREE.MathUtils.randFloat(0, 1);
+    const v = THREE.MathUtils.randFloat(0, 1);
     const theta = 2 * Math.PI * u;
     const phi = Math.acos(2 * v - 1);
     const x = r * Math.sin(theta) * Math.sin(phi);

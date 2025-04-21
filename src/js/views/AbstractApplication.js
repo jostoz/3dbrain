@@ -13,54 +13,61 @@ class AbstractApplication {
   constructor(container) {
     // Use document.body if no container is provided
     this.container = container || document.body;
+    console.log('AbstractApplication constructor called');
     this.stats = AbstractApplication.initStats(this.container);
+    console.log('Container:', this.container);
     
     // Scene setup
-    this.a_scene = new THREE.Scene();
-    this.a_blurScene = new THREE.Scene();
-    this.a_bloomScene = new THREE.Scene();
-    
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x440088); // Purple background
+    this.mouse = { x: 0, y: 0 };
+
     // Camera setup
     this.a_camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
+      75, 
+      window.innerWidth / window.innerHeight, 
+      0.1, 
       1000
     );
     this.a_camera.position.z = 5;
-    
+
     // Renderer setup
     this.a_renderer = new THREE.WebGLRenderer({ antialias: true });
     this.a_renderer.setSize(window.innerWidth, window.innerHeight);
     this.a_renderer.setClearColor(0x000000);
     this.a_renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.container.appendChild(this.a_renderer.domElement);
-    
+
     // Controls setup
     this.orbitControls = new OrbitControls(this.a_camera, this.a_renderer.domElement);
     this.orbitControls.enableDamping = true;
-    this.container.appendChild(this.a_renderer.domElement);
-    
+
     // Post-processing setup
+    // Add a simple cube for debugging
+    const debugGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const debugMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const debugCube = new THREE.Mesh(debugGeometry, debugMaterial);
+    this.scene.add(debugCube);
+    console.log('Debug cube added to scene');
+    
+    // Setup composer and effects
     this.composer = new EffectComposer(this.a_renderer);
-    const renderPass = new RenderPass(this.a_scene, this.a_camera);
+    const renderPass = new RenderPass(this.scene, this.a_camera);
+    
     const bloomEffect = new BloomEffect({
-      intensity: 1.5,
-      kernelSize: 2,
-      luminanceThreshold: 0.85,
       luminanceSmoothing: 0.0
     });
-    
+
     const effectPass = new EffectPass(this.a_camera, bloomEffect);
-    
+
     this.composer.addPass(renderPass);
     this.composer.addPass(effectPass);
     effectPass.renderToScreen = true;
-    
+
     // Event listeners
     window.addEventListener('resize', this.onWindowResize.bind(this));
     window.addEventListener('mousemove', this.onMouseMove.bind(this));
-    
+
     // Start animation loop
     this.animate();
   }
@@ -74,12 +81,13 @@ class AbstractApplication {
   }
 
   get scene() {
-    return this.a_scene;
+    return this.scene;
   }
 
   get blurScene() {
     return this.a_blurScene;
   }
+  
   get bloomScene() {
     return this.a_bloomScene;
   }
@@ -117,12 +125,16 @@ class AbstractApplication {
 
     // Update controls
     this.orbitControls.update();
-
-    // Update stats
-    this.stats.update();
-
-    // Render scene with post-processing
+    
+    // Add debug rotation for the cube
+    const debugCube = this.scene.getObjectByProperty('type', 'Mesh');
+    if (debugCube) {
+      debugCube.rotation.x += 0.01;
+      debugCube.rotation.y += 0.01;
+    }
+    
     this.composer.render();
+    this.stats.update();
   }
 }
 

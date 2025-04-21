@@ -1,6 +1,6 @@
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["bubbles"] }] */
 import * as THREE from 'three';
-import { Power1, TweenMax, Power2 } from 'gsap';
+import { gsap, Power1, Power2 } from 'gsap';
 import _ from 'lodash';
 import flashingV from '../shaders/flashing.vert';
 import flashingF from '../shaders/flashing.frag';
@@ -38,16 +38,10 @@ class ThinkingAnimation {
             delay[index * 2 + 1] = duration;
         });
 
-        geometry.addAttribute(
-            'aDelayDuration',
-            new THREE.Float32BufferAttribute(delay, 2),
-        );
-        geometry.addAttribute(
-            'position',
-            new THREE.Float32BufferAttribute(positions, 3),
-        );
-        geometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-        geometry.addAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
+        geometry.setAttribute('aDelayDuration', new THREE.Float32BufferAttribute(delay, 2));
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
         geometry.computeBoundingSphere();
         const customMaterial = new THREE.ShaderMaterial({
             uniforms: {
@@ -67,7 +61,6 @@ class ThinkingAnimation {
             },
             vertexShader: flashingV,
             fragmentShader: flashingF,
-            vertexColors: THREE.VertexColors,
             blending: THREE.AdditiveBlending,
             side: THREE.DoubleSide,
             depthTest: false,
@@ -80,42 +73,33 @@ class ThinkingAnimation {
 
     animationCamera(val) {
         this.mainBrain.isRecording = false;
-        // this.isActive(true);
         this.flashing.material.uniforms.uFadeTime.value = 1;
         this.isFlashing = true;
 
         if (this.alphaAnimation.v === 0.0) {
-            TweenMax.fromTo(
-                this.alphaAnimation,
-                2.5,
-                { v: 0.0 },
-                {
-                    v: 1.0,
-                    ease: Power1.easeInOut,
-                    onStart: () => {
-                        this.selectMemoryThinking(val);
-                    },
-                    onUpdate: () => {
-                        this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
-                    },
+            gsap.to(this.alphaAnimation, {
+                v: 1.0,
+                duration: 2.5,
+                ease: "power1.inOut",
+                onStart: () => {
+                    this.selectMemoryThinking(val);
                 },
-            );
+                onUpdate: () => {
+                    this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
+                }
+            });
         } else {
-            TweenMax.fromTo(
-                this.alphaAnimation,
-                1.0,
-                { v: 1.0 },
-                {
-                    v: 0.0,
-                    ease: Power1.easeInOut,
-                    onUpdate: () => {
-                        this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
-                    },
-                    onComplete: () => {
-                        this.thinkingFadeIn(val);
-                    },
+            gsap.to(this.alphaAnimation, {
+                v: 0.0,
+                duration: 1.0,
+                ease: "power1.inOut",
+                onUpdate: () => {
+                    this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
                 },
-            );
+                onComplete: () => {
+                    this.thinkingFadeIn(val);
+                }
+            });
         }
 
         this.flashing.geometry.setDrawRange(0, 1);
@@ -124,14 +108,11 @@ class ThinkingAnimation {
     selectMemoryThinking(val) {
         const lights = Object.keys(flashingCoordinates);
         const light = lights[Math.floor(val)];
-
         const locations = flashingCoordinates[light];
-        if (!locations) {
-            return;
-        }
+        
+        if (!locations) return;
 
         const positions = this.flashing.geometry.attributes.position.array;
-
         for (let i = 0; i < positions.length; i += 1) {
             positions[i * 3] = locations.x;
             positions[i * 3 + 1] = locations.y;
@@ -140,52 +121,31 @@ class ThinkingAnimation {
 
         this.flashing.material.uniforms.isCustomAlpha.value = true;
 
-        const { camera } = this.mainBrain;
-
-        const cameraPos = {
-            x: camera.position.x,
-            y: camera.position.y,
-            z: camera.position.z,
-        };
-
-        TweenMax.fromTo(
-            cameraPos,
-            1.5,
-            { x: cameraPos.x, y: cameraPos.y, z: cameraPos.z },
-            {
-                x: locations.camera.x,
-                y: locations.camera.y,
-                z: locations.camera.z,
-                ease: Power1.easeInOut,
-                onUpdate: () => {
-                    camera.position.x = cameraPos.x;
-                    camera.position.y = cameraPos.y;
-                    camera.position.z = cameraPos.z;
-                },
-                onComplete: () => {
-                    this.secuenceAnimation += 1;
-                    this.animationCamera(this.secuenceAnimation);
-                },
-            },
-        );
+        gsap.to(this.mainBrain.camera.position, {
+            x: locations.camera.x,
+            y: locations.camera.y,
+            z: locations.camera.z,
+            duration: 1.5,
+            ease: "power1.inOut",
+            onComplete: () => {
+                this.secuenceAnimation += 1;
+                this.animationCamera(this.secuenceAnimation);
+            }
+        });
     }
 
     thinkingFadeIn(val) {
-        TweenMax.fromTo(
-            this.alphaAnimation,
-            2.5,
-            { v: 0.0 },
-            {
-                v: 1.0,
-                ease: Power1.easeInOut,
-                onUpdate: () => {
-                    this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
-                },
-                onStart: () => {
-                    this.selectMemoryThinking(val);
-                },
+        gsap.to(this.alphaAnimation, {
+            v: 1.0,
+            duration: 2.5,
+            ease: "power1.inOut",
+            onUpdate: () => {
+                this.flashing.material.uniforms.uAlpha.value = this.alphaAnimation.v;
             },
-        );
+            onStart: () => {
+                this.selectMemoryThinking(val);
+            }
+        });
     }
 
     updateSubSystem(subsystemPayload) {
@@ -196,7 +156,7 @@ class ThinkingAnimation {
         const progress = { p: 1.0 };
 
         this.mainBrain.font.removeText();
-        TweenMax.fromTo(
+        gsap.fromTo(
             progress,
             2.5,
             { p: 1.0 },
@@ -232,37 +192,25 @@ class ThinkingAnimation {
         );
         this.flashing.material.uniforms.uTime.value = delta;
     }
-    isActive(val) {
-        if (val) {
-            const progress = { p: 0.0 };
-            TweenMax.fromTo(
-                progress,
-                2.5,
-                { p: 0.0 },
-                {
-                    p: 1.0,
-                    ease: Power1.easeInOut,
-                    onUpdate: () => {
-                        this.flashing.material.uniforms.uFadeTime.value = progress.p;
-                        this.isFlashing = true;
-                    },
-                },
-            );
+    isActive(status) {
+        if (status) {
+            gsap.to(this.flashing.material.uniforms.uAlpha, {
+                value: 1,
+                duration: 2.5,
+                ease: "power2.inOut",
+                onStart: () => {
+                    this.flashing.material.uniforms.isCustomAlpha.value = true;
+                }
+            });
         } else {
-            const progress = { p: 1.0 };
-            TweenMax.fromTo(
-                progress,
-                2.5,
-                { p: 1.0 },
-                {
-                    p: 0.0,
-                    ease: Power1.easeInOut,
-                    onUpdate: () => {
-                        this.flashing.material.uniforms.uFadeTime.value = progress.p;
-                        this.isFlashing = false;
-                    },
-                },
-            );
+            gsap.to(this.flashing.material.uniforms.uAlpha, {
+                value: 0,
+                duration: 2.5,
+                ease: "power2.inOut",
+                onComplete: () => {
+                    this.flashing.material.uniforms.isCustomAlpha.value = false;
+                }
+            });
         }
     }
     updateMouse(coordinates) {
@@ -273,92 +221,66 @@ class ThinkingAnimation {
         this.flashing.material.uniforms.uIsFlashing.value = isActive;
 
         if (isActive) {
-            const progress = { p: 0.0 };
-            TweenMax.fromTo(
-                progress,
-                2.5,
-                { p: 0.0 },
-                {
-                    p: 1.0,
-                    ease: Power1.easeInOut,
-                    onUpdate: (value) => {
-                        this.flashing.material.uniforms.uFlashingAlpha.value = progress.p;
-                        this.isFlashing = true;
-                    },
-                },
-            );
+            gsap.to(this.flashing.material.uniforms.uFlashingAlpha, {
+                value: 1,
+                duration: 2.5,
+                ease: "power1.inOut",
+                onUpdate: () => {
+                    this.isFlashing = true;
+                }
+            });
         } else {
-            const progress = { p: 1.0 };
-            TweenMax.fromTo(
-                progress,
-                2.5,
-                { p: 1.0 },
-                {
-                    p: 0.0,
-                    ease: Power1.easeInOut,
-                    onUpdate: (value) => {
-                        this.flashing.material.uniforms.uFlashingAlpha.value = progress.p;
-                        this.isFlashing = false;
-                    },
-                },
-            );
+            gsap.to(this.flashing.material.uniforms.uFlashingAlpha, {
+                value: 0,
+                duration: 2.5,
+                ease: "power1.inOut",
+                onUpdate: () => {
+                    this.isFlashing = false;
+                }
+            });
         }
     }
 
     animate(isActive) {
         const cameraPos = this.mainBrain.camera.position;
         const { target } = this.mainBrain.orbitControls;
+        
         if (!this.isFlashing) {
             this.flashingAnimation(true);
         }
+        
         if (isActive) {
-            const progress = { p: 0.0 };
-            TweenMax.fromTo(
-                progress,
-                2.5,
-                { p: 0.0 },
-                {
-                    p: 1.0,
-                    ease: Power1.easeInOut,
-                    onUpdate: () => {
-                        this.updateBurbleUp(progress.p);
-                        this.mainBrain.orbitControls.target.set(
-                            target.x,
-                            target.y + progress.p,
-                            target.z,
-                        );
-                        this.mainBrain.camera.position.set(
-                            cameraPos.x,
-                            cameraPos.y + progress.p,
-                            cameraPos.z,
-                        );
-                    },
-                },
-            );
+            gsap.to(this.mainBrain.orbitControls.target, {
+                x: target.x,
+                y: target.y + 1,
+                z: target.z,
+                duration: 2.5,
+                ease: "power1.inOut"
+            });
+
+            gsap.to(this.mainBrain.camera.position, {
+                x: cameraPos.x,
+                y: cameraPos.y + 1,
+                z: cameraPos.z,
+                duration: 2.5,
+                ease: "power1.inOut"
+            });
         } else {
-            const progress = { p: 1.0 };
-            TweenMax.fromTo(
-                progress,
-                2.5,
-                { p: 1.0 },
-                {
-                    p: 0.0,
-                    ease: Power1.easeInOut,
-                    onUpdate: () => {
-                        this.updateBurbleUp(progress.p);
-                        this.mainBrain.orbitControls.target.set(
-                            target.x,
-                            target.y - progress.p,
-                            target.z,
-                        );
-                        this.mainBrain.camera.position.set(
-                            cameraPos.x,
-                            cameraPos.y - progress.p,
-                            cameraPos.z,
-                        );
-                    },
-                },
-            );
+            gsap.to(this.mainBrain.orbitControls.target, {
+                x: target.x,
+                y: target.y - 1,
+                z: target.z,
+                duration: 2.5,
+                ease: "power1.inOut"
+            });
+
+            gsap.to(this.mainBrain.camera.position, {
+                x: cameraPos.x,
+                y: cameraPos.y - 1,
+                z: cameraPos.z,
+                duration: 2.5,
+                ease: "power1.inOut"
+            });
         }
     }
 }

@@ -1,18 +1,19 @@
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["data"] }] */
-import * as BAS from 'three-bas/dist/bas.module.js';
-import * as THREE from 'three';
-import { Power1, TweenMax } from 'gsap';
-import Chuncks from './chunks';
-import xRayVertex from '../shaders/xRay.vert';
-import xRayFrag from '../shaders/xRay.frag';
-
+import * as THREE from "three";
+import { Power1, gsap } from "gsap";
+import * as BAS from "three-bas/dist/bas.module.js";
+import { BufferGeometry, Color, Points, ShaderMaterial, Vector3 } from "three";
+import { PrefabBufferGeometry } from "three-bas";
+import Chunks from "./chunks";
+import xRayVertex from "../shaders/xRay.vert";
+import xRayFrag from "../shaders/xRay.frag";
 
 class ParticleSystem {
-    constructor(mainBrain, brainParticles, memories) {
-        this.chuncks = new Chuncks();
+    constructor(brainParticles, memories, mainBrain) {
         this.brainParticles = brainParticles;
         this.memories = memories;
         this.mainBrain = mainBrain;
+        this.chuncks = Chunks();
         this.particlesStartColor = new THREE.Color(0xffffff);
         this.particlesColor = new THREE.Color(0xffffff);
         const { xRayEffect, systemPoints } = this.init();
@@ -30,42 +31,52 @@ class ParticleSystem {
         const maxPointDelay = 0.3;
 
         const brainPoints = this.brainParticles.attributes.position.array;
-
         const count = brainPoints.length / 3;
-        const me = this;
 
-        const geometry = new BAS.PointBufferGeometry(count);
+        const geometry = new THREE.BufferGeometry();
+        const positions = [];
+        const colors = [];
+        const sizes = [];
+
+        for (let i = 0; i < count; i++) {
+            positions.push(
+                brainPoints[i * 3 + 0],
+                brainPoints[i * 3 + 1],
+                brainPoints[i * 3 + 2]
+            );
+            
+            colors.push(1, 1, 1);
+            sizes.push(THREE.MathUtils.randFloat(200.0, 400.0));
+        }
+
+        geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+        geometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1));
 
         const loadingCircle = ParticleSystem.getLoadingPoints();
-        geometry.createAttribute('aStartLoading', 3, (data, index, num) => {
+        geometry.createAttribute('aStartLoading', 3, (data, index) => {
             const startVec3 = new THREE.Vector3();
             if (loadingCircle.length < brainPoints.length) {
                 startVec3.x = loadingCircle[(index * 3) + 0] || 0.0;
                 startVec3.y = loadingCircle[(index * 3) + 1] || 0.0;
-                startVec3.z = THREE.Math.randFloat(-80.0, 1500.0); // loadingCircle[index * 3 + 2] || 0
+                startVec3.z = THREE.MathUtils.randFloat(-80.0, 1500.0);
             } else {
                 startVec3.x = 100.0;
                 startVec3.y = 100.0;
-                startVec3.z = THREE.Math.randFloat(-80.0, 1500.0); // loadingCircle[index * 3 + 2] || 0
+                startVec3.z = THREE.MathUtils.randFloat(-80.0, 1500.0);
             }
             startVec3.toArray(data);
         });
 
         const color = new THREE.Color();
         geometry.createAttribute('aStartColor', 3, (data) => {
-            const { r, g, b } = me.particlesStartColor;
-
+            const { r, g, b } = this.particlesStartColor;
             color.setRGB(r, g, b);
             color.toArray(data);
         });
 
-        geometry.createAttribute('scale', 1, (data) => {
-            data[0] = THREE.Math.randFloat(200.0, 400.0);
-        });
-
         geometry.createAttribute('aEndColor', 3, (data) => {
-            const { r, g, b } = me.particlesStartColor;
-
+            const { r, g, b } = this.particlesStartColor;
             color.setRGB(r, g, b);
             color.toArray(data);
         });
@@ -85,26 +96,12 @@ class ParticleSystem {
             data[1] = duration;
         });
 
-
-        const geometry2 = new BAS.PointBufferGeometry(count);
-
-        geometry2.createAttribute('position', 3, (data, index) => {
-            const startVec3 = new THREE.Vector3();
-            startVec3.x = brainPoints[(index * 3) + 0];
-            startVec3.y = brainPoints[(index * 3) + 1];
-            startVec3.z = brainPoints[(index * 3) + 2];
-            startVec3.toArray(data);
-        });
-
-
-        const material = new BAS.PointsAnimationMaterial({
-            // transparent: true,
-            // blending: THREE.AdditiveBlending,
-            vertexColors: THREE.VertexColors,
-            deptWrite: false,
-
+        const material = new THREE.ShaderMaterial({
+            vertexShader: xRayVertex,
+            fragmentShader: xRayFrag,
             blending: THREE.AdditiveBlending,
-            depthTest: true,
+            side: THREE.DoubleSide,
+            depthTest: false,
             transparent: true,
             uniforms: {
                 uTime: { type: 'f', value: 0 },
@@ -277,7 +274,7 @@ class ParticleSystem {
     isXRayActive(status) {
         if (status) {
             const progress = { p: 0.0 };
-            TweenMax.fromTo(progress, 3.0, { p: 3.0 }, {
+            gsap.fromTo(progress, 3.0, { p: 3.0 }, {
                 p: 5.0,
                 ease: Power1.easeIn,
                 onUpdate: () => {
@@ -288,7 +285,7 @@ class ParticleSystem {
             });
         } else {
             const progress = { p: 1.0 };
-            TweenMax.fromTo(progress, 3.0, { p: 5.0 }, {
+            gsap.fromTo(progress, 3.0, { p: 5.0 }, {
                 p: 3.0,
                 ease: Power1.easeIn,
                 onUpdate: () => {
@@ -307,7 +304,7 @@ class ParticleSystem {
     transform(status) {
         if (status) {
             const progress = { p: 0.0 };
-            TweenMax.fromTo(progress, 5.9, { p: 0.0 }, {
+            gsap.fromTo(progress, 5.9, { p: 0.0 }, {
                 p: 1.5,
                 ease: Power1.easeIn,
                 onUpdate: () => {
@@ -321,7 +318,7 @@ class ParticleSystem {
             });
         } else {
             const progress = { p: 1.0 };
-            TweenMax.fromTo(progress, 2.0, { p: 1.0 }, {
+            gsap.fromTo(progress, 2.0, { p: 1.0 }, {
                 p: 0.5,
                 ease: Power1.easeIn,
                 onUpdate: () => {
