@@ -1,7 +1,7 @@
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["child", "memories"] }] */
 import * as THREE from "three";
 import { Power4, gsap } from "gsap";
-import "three/examples/js/BufferGeometryUtils";
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import AbstractApplication from "./views/AbstractApplication";
 import Loaders from "./Loaders/Loaders";
 import BubblesAnimation from "./services/bubblesAnimation";
@@ -56,7 +56,7 @@ class MainBrain extends AbstractApplication {
   }
 
   addFloor() {
-    const geometry = new THREE.PlaneBufferGeometry(20000, 20000);
+    const geometry = new THREE.PlaneGeometry(20000, 20000);
     const material = new THREE.MeshPhongMaterial({
       opacity: 0.1,
       transparent: true,
@@ -122,7 +122,7 @@ class MainBrain extends AbstractApplication {
       };
     });
 
-    this.endPointsCollections = THREE.BufferGeometryUtils.mergeBufferGeometries(
+    this.endPointsCollections = BufferGeometryUtils.mergeBufferGeometries(
       this.brainBufferGeometries
     );
   }
