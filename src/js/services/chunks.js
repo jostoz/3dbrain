@@ -1,6 +1,6 @@
-import noise from '../chunks/noise.raw.xml';
-import random from '../chunks/random.raw.xml';
-import rotate from '../chunks/rotate.raw.xml';
+import noise from '../chunks/noise.glsl';
+import random from '../chunks/random.glsl';
+import rotate from '../chunks/rotate.glsl';
 
 export default () => ({
     noise,

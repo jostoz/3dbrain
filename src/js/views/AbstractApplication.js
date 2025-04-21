@@ -5,8 +5,8 @@ import Stats from "three/examples/jsm/libs/stats.module";
 import {
   EffectComposer,
   RenderPass,
-  BloomPass,
-  MaskPass,
+  BloomEffect,
+  EffectPass,
 } from "postprocessing";
 
 class AbstractApplication {
@@ -44,15 +44,18 @@ class AbstractApplication {
     // Post-processing setup
     this.composer = new EffectComposer(this.a_renderer);
     const renderPass = new RenderPass(this.a_scene, this.a_camera);
-    const bloomPass = new BloomPass({
+    const bloomEffect = new BloomEffect({
       intensity: 1.5,
       kernelSize: 2,
       luminanceThreshold: 0.85,
       luminanceSmoothing: 0.0
     });
     
+    const effectPass = new EffectPass(this.a_camera, bloomEffect);
+    
     this.composer.addPass(renderPass);
-    this.composer.addPass(bloomPass);
+    this.composer.addPass(effectPass);
+    effectPass.renderToScreen = true;
     
     // Event listeners
     window.addEventListener('resize', this.onWindowResize.bind(this));
