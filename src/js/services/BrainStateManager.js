@@ -1,4 +1,4 @@
-import { EventEmitter } from 'node:events';
+import { EventEmitter } from './EventEmitter';
 
 // Enums para los diferentes estados
 export const BrainState = {
@@ -9,7 +9,7 @@ export const BrainState = {
     ERROR: 'ERROR'
 };
 
-// URLs de prueba para cada memoria
+// URLs para cada memoria
 export const MemoryUrls = {
     analytic: '/demo/analytic',
     episodic: '/demo/episodic',
@@ -57,7 +57,7 @@ export class BrainStateManager extends EventEmitter {
                 selected: null,
                 highlighted: null,
                 history: [],
-                targetUrl: null // Nueva propiedad para la URL de destino
+                targetUrl: null
             },
             transition: {
                 active: false,
@@ -126,7 +126,7 @@ export class BrainStateManager extends EventEmitter {
     }
 
     updateBrainVisualization(brainState) {
-        if (!this.mainBrain?.bubblesAnimation) return;
+        if (!this.mainBrain || !this.mainBrain.bubblesAnimation) return;
 
         switch (brainState.current) {
             case BrainState.TRANSITIONING:
@@ -139,7 +139,7 @@ export class BrainStateManager extends EventEmitter {
     }
 
     updateMemoryVisualization(currentMemory, previousMemory) {
-        if (!this.mainBrain?.bubblesAnimation?.bubbles) return;
+        if (!this.mainBrain || !this.mainBrain.bubblesAnimation || !this.mainBrain.bubblesAnimation.bubbles) return;
 
         const bubbles = this.mainBrain.bubblesAnimation.bubbles;
         
@@ -153,7 +153,7 @@ export class BrainStateManager extends EventEmitter {
     }
 
     updateTransitionEffects(transitionState) {
-        if (!transitionState.active || !this.mainBrain?.bubblesAnimation?.bubbles) return;
+        if (!this.mainBrain || !this.mainBrain.bubblesAnimation || !this.mainBrain.bubblesAnimation.bubbles) return;
 
         const bubbles = this.mainBrain.bubblesAnimation.bubbles;
         bubbles.material.uniforms.uTransitionProgress.value = transitionState.progress;
@@ -207,7 +207,6 @@ export class BrainStateManager extends EventEmitter {
         });
 
         if (target) {
-            // Obtener la URL correspondiente a la memoria seleccionada
             const targetUrl = MemoryUrls[target] || null;
             
             this.updateState('memory', {
@@ -216,11 +215,10 @@ export class BrainStateManager extends EventEmitter {
                 targetUrl
             });
 
-            // Si hay una URL definida, redirigir después de un pequeño delay
             if (targetUrl) {
                 setTimeout(() => {
                     window.location.href = targetUrl;
-                }, 1000); // 1 segundo de delay para permitir que las animaciones terminen
+                }, 1000);
             }
         }
     }

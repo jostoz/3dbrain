@@ -1,18 +1,18 @@
 {
   "presets": [
-    ["env", {
+    ["@babel/preset-env", {
       "modules": false,
       "targets": {
-        "browsers": ["> 1%", "last 2 versions", "not ie <= 8"]
+        "node": "18",
+        "browsers": [">0.2%", "not dead", "not op_mini all"]
       }
-    }],
-    "stage-2"
+    }]
   ],
-  "plugins": ["transform-runtime", "glslify"],
+  "plugins": ["glslify"],
   "env": {
     "test": {
-      "presets": ["env", "stage-2"],
-      "plugins": ["transform-runtime", "glslify"]
+      "presets": ["@babel/preset-env"],
+      "plugins": ["glslify"]
     }
   }
 }
