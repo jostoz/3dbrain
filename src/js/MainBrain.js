@@ -1,7 +1,7 @@
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor": ["child", "memories"] }] */
 import * as THREE from "three";
 import { Power4, gsap } from "gsap";
-import { mergeBufferGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import * as BufferGeometryUtils from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import AbstractApplication from "./views/AbstractApplication";
 import Loaders from "./Loaders/Loaders";
 import BubblesAnimation from "./services/bubblesAnimation";
@@ -122,7 +122,7 @@ class MainBrain extends AbstractApplication {
       };
     });
 
-    this.endPointsCollections = mergeBufferGeometries(
+    this.endPointsCollections = BufferGeometryUtils.mergeGeometries(
       this.brainBufferGeometries
     );
   }
@@ -205,7 +205,7 @@ class MainBrain extends AbstractApplication {
         if (memories[m].length) {
           memories[m].push(mesh.geometry);
           memories[m] = [
-            THREE.BufferGeometryUtils.mergeBufferGeometries(memories[m]),
+            THREE.BufferGeometryUtils.BufferGeometryUtils.mergeGeometries(memories[m]),
           ];
           return memories;
         }
@@ -298,3 +298,5 @@ class MainBrain extends AbstractApplication {
 }
 
 export default MainBrain;
+
+

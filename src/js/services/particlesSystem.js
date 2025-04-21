@@ -237,9 +237,7 @@ class ParticleSystem {
         const systemPoints = new THREE.Points(geometry, material);
 
         console.error('MEMORIES', this.memories);
-        const xRayGeometry = new THREE.Geometry().fromBufferGeometry(this.mainBrain.endPointsCollections);
-        xRayGeometry.computeFaceNormals();
-        xRayGeometry.mergeVertices();
+        const xRayGeometry = this.mainBrain.endPointsCollections.clone();
         xRayGeometry.computeVertexNormals();
 
         const xRayEffect = new THREE.Mesh(xRayGeometry, xRayMaterial);
