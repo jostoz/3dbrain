@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Power1, Back, TweenMax } from "gsap";
-import * as dat from "three/examples/js/libs/dat.gui.min";
+import * as dat from "dat-gui";
 import testPayload from "../data/testPayload";
 
 class GUI {
