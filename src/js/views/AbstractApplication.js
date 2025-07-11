@@ -11,25 +11,25 @@ import {
 
 class AbstractApplication {
   constructor(container) {
-    // Use document.body if no container is provided
+    // Use document.body if no container is provided (original behavior)
     this.container = container || document.body;
     console.log('AbstractApplication constructor called');
-    this.stats = AbstractApplication.initStats(this.container);
     console.log('Container:', this.container);
+    this.stats = AbstractApplication.initStats(this.container);
     
     // Scene setup
     this.a_scene = new THREE.Scene();
-    this.a_scene.background = new THREE.Color(0x440088); // Purple background
+    this.a_scene.background = new THREE.Color(0x000000); // Black background
     this.mouse = { x: 0, y: 0 };
 
     // Camera setup
     this.a_camera = new THREE.PerspectiveCamera(
-      75, 
+      45, 
       window.innerWidth / window.innerHeight, 
-      0.1, 
-      1000
+      1, 
+      10000
     );
-    this.a_camera.position.z = 5;
+    this.a_camera.position.z = 1000;
 
     // Renderer setup
     this.a_renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -43,12 +43,13 @@ class AbstractApplication {
     this.orbitControls.enableDamping = true;
 
     // Post-processing setup
-    // Add a simple cube for debugging
-    const debugGeometry = new THREE.BoxGeometry(1, 1, 1);
+    // Add a larger cube for debugging
+    const debugGeometry = new THREE.BoxGeometry(150, 150, 150);
     const debugMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
     const debugCube = new THREE.Mesh(debugGeometry, debugMaterial);
+    debugCube.position.set(0, 200, 0);
     this.a_scene.add(debugCube);
-    console.log('Debug cube added to scene');
+    console.log('Debug cube added to scene at (0, 200, 0)');
     
     // Setup composer and effects
     this.composer = new EffectComposer(this.a_renderer);
@@ -124,17 +125,7 @@ class AbstractApplication {
 
   animate() {
     requestAnimationFrame(this.animate.bind(this));
-
-    // Update controls
     this.orbitControls.update();
-    
-    // Add debug rotation for the cube
-    const debugCube = this.a_scene.getObjectByProperty('type', 'Mesh');
-    if (debugCube) {
-      debugCube.rotation.x += 0.01;
-      debugCube.rotation.y += 0.01;
-    }
-    
     this.composer.render();
     this.stats.update();
   }

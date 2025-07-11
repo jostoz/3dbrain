@@ -52,9 +52,38 @@ class Loaders {
     loadOBJs() {
         const loader = new OBJLoader(this.loadingManager);
         this.models.forEach((m, i) => {
-            loader.load(`static/models/${m}`, (model) => {
-                this.setModel(model, i);
-            });
+            const modelPath = `static/models/${m}`;
+            console.log(`Loading model: ${modelPath}`);
+            
+            loader.load(
+                modelPath, 
+                (model) => {
+                    console.log(`Model loaded successfully: ${modelPath}`);
+                    console.log('Model structure:', model);
+                    
+                    let meshCount = 0;
+                    let vertexCount = 0;
+                    
+                    model.traverse((child) => {
+                        if (child instanceof THREE.Mesh) {
+                            meshCount++;
+                            const positions = child.geometry.attributes.position;
+                            if (positions) {
+                                vertexCount += positions.count;
+                            }
+                        }
+                    });
+                    
+                    console.log(`Model stats - Meshes: ${meshCount}, Total vertices: ${vertexCount}`);
+                    this.setModel(model, i);
+                },
+                (xhr) => {
+                    console.log(`Loading progress: ${(xhr.loaded / xhr.total * 100).toFixed(2)}%`);
+                },
+                (error) => {
+                    console.error(`Error loading model ${modelPath}:`, error);
+                }
+            );
         });
     }
 

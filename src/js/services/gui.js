@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Power1, Back, TweenMax } from "gsap";
-import * as dat from "dat-gui";
+import { GUI as DatGUI } from "lil-gui";
 import testPayload from "../data/testPayload";
 
 class GUI {
@@ -37,7 +37,7 @@ class GUI {
       this.showXray = false;
     })();
 
-    const gui = new dat.GUI();
+    const gui = new DatGUI();
 
     gui.add(this.controls, "rotationSpeed", 0.1, 2.0);
     gui.add(this.controls, "autoRotate").onChange((val) => {

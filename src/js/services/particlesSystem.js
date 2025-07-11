@@ -10,15 +10,33 @@ import xRayFrag from "../shaders/xRay.frag";
 
 class ParticleSystem {
     constructor(brainParticles, memories, mainBrain) {
+        if (!brainParticles || !brainParticles.attributes || !brainParticles.attributes.position) {
+            console.error('Invalid brainParticles parameter:', brainParticles);
+            return;
+        }
+        if (!memories) {
+            console.error('Invalid memories parameter:', memories);
+            return;
+        }
+        if (!mainBrain) {
+            console.error('Invalid mainBrain parameter:', mainBrain);
+            return;
+        }
+
         this.brainParticles = brainParticles;
         this.memories = memories;
         this.mainBrain = mainBrain;
         this.chuncks = Chunks();
         this.particlesStartColor = new THREE.Color(0xffffff);
         this.particlesColor = new THREE.Color(0xffffff);
-        const { xRayEffect, systemPoints } = this.init();
-        this.particles = systemPoints;
-        this.xRay = xRayEffect;
+        
+        try {
+            const { xRayEffect, systemPoints } = this.init();
+            this.particles = systemPoints;
+            this.xRay = xRayEffect;
+        } catch (error) {
+            console.error('Failed to initialize particle system:', error);
+        }
     }
 
     static getLoadingPoints() {
@@ -27,6 +45,10 @@ class ParticleSystem {
     }
 
     init() {
+        if (!this.brainParticles?.attributes?.position?.array) {
+            throw new Error('Brain particles position array is not available');
+        }
+
         const duration = 1.0;
         const maxPointDelay = 0.3;
 
