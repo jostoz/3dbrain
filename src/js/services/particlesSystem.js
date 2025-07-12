@@ -9,11 +9,11 @@ class ParticleSystem {
         this.mainBrain = mainBrain;
         this.particlesStartColor = new THREE.Color(0xffffff);
         this.particlesColor = new THREE.Color(0xffffff);
-        
+
         const { xRayEffect, systemPoints } = this.init();
         this.particles = systemPoints;
         this.xRay = xRayEffect;
-        
+
         console.log('ParticleSystem initialized successfully');
     }
 
@@ -24,7 +24,7 @@ class ParticleSystem {
 
     init() {
         console.log('ParticleSystem init started');
-        
+
         if (!this.brainParticles || !this.brainParticles.attributes || !this.brainParticles.attributes.position) {
             console.error('Invalid brain particles data');
             return { systemPoints: null, xRayEffect: null };
@@ -43,13 +43,13 @@ class ParticleSystem {
         for (let i = 0; i < count; i++) {
             positions.push(
                 brainPoints[i * 3 + 0] || 0,
-                brainPoints[i * 3 + 1] || 0, 
+                brainPoints[i * 3 + 1] || 0,
                 brainPoints[i * 3 + 2] || 0
             );
         }
-        
+
         geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-        
+
         // Add colors
         const colors = [];
         for (let i = 0; i < count; i++) {
@@ -67,19 +67,19 @@ class ParticleSystem {
             depthTest: true,
             sizeAttenuation: true
         });
-        
+
         // Create particles system
         const systemPoints = new THREE.Points(geometry, material);
         console.log('Particle system created with', count, 'points');
-        
+
         // Create enhanced x-ray effect (wireframe brain)
-        const xRayMaterial = new THREE.MeshBasicMaterial({ 
+        const xRayMaterial = new THREE.MeshBasicMaterial({
             color: 0x00ffff,
             wireframe: true,
             transparent: true,
             opacity: 0.6
         });
-        
+
         let xRayEffect = null;
         try {
             const xRayGeometry = new THREE.Geometry().fromBufferGeometry(this.mainBrain.endPointsCollections);
@@ -92,7 +92,7 @@ class ParticleSystem {
             xRayEffect = new THREE.Mesh(cubeGeometry, xRayMaterial);
             console.log('Fallback X-Ray cube created');
         }
-        
+
         return { systemPoints, xRayEffect };
     }
 
