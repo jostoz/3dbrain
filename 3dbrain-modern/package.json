@@ -1,0 +1,25 @@
+{
+  "name": "3dbrain-modern",
+  "version": "1.0.0",
+  "description": "Modern lightweight 3D brain visualization using Three.js and Vite",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.ts --fix"
+  },
+  "dependencies": {
+    "three": "^0.168.0",
+    "gsap": "^3.12.2",
+    "lil-gui": "^0.19.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-standard": "^17.0.0"
+  },
+  "keywords": ["threejs", "3d", "brain", "visualization", "webgl"],
+  "author": "Modern Brain Project",
+  "license": "MIT"
+}

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Brain Modern - Interactive Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #a7b6d2 0%, #8da2be 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #app {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            z-index: 100;
+            text-align: center;
+        }
+
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 14px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div id="loading">
+            <div class="loading-spinner"></div>
+            <div>Loading 3D Brain...</div>
+        </div>
+        
+        <div id="info" style="display: none;">
+            <h3>🧠 3D Brain Visualization</h3>
+            <p><strong>Mouse:</strong> Rotate camera</p>
+            <p><strong>Scroll:</strong> Zoom in/out</p>
+            <p><strong>Right-click + drag:</strong> Pan</p>
+            <br>
+            <div id="stats">
+                <div>Particles: <span id="particle-count">0</span></div>
+                <div>FPS: <span id="fps">--</span></div>
+            </div>
+        </div>
+
+        <div id="controls"></div>
+    </div>
+
+    <script type="module" src="/src/main-simple.js"></script>
+</body>
+</html>
