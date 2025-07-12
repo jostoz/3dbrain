@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+    <style>
+        body { 
+            margin: 0; 
+            background: #333; 
+            color: white; 
+            font-family: monospace; 
+            padding: 20px;
+        }
+        .status { margin: 10px 0; }
+        .error { color: red; }
+        .success { color: green; }
+        #output { 
+            background: black; 
+            padding: 10px; 
+            margin: 20px 0; 
+            border: 1px solid #666;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>3D Brain Debug Test</h1>
+    <div class="status">Testing basic functionality...</div>
+    <div id="output"></div>
+    
+    <script>
+        const output = document.getElementById('output');
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + msg;
+            output.appendChild(div);
+            console.log(msg);
+        }
+        
+        log('=== DEBUG TEST START ===', 'success');
+        
+        // Test 1: Basic JavaScript
+        try {
+            log('✓ JavaScript execution working');
+        } catch (e) {
+            log('✗ JavaScript execution failed: ' + e.message, 'error');
+        }
+        
+        // Test 2: Event listeners
+        try {
+            document.addEventListener('click', () => {
+                log('✓ Click event working');
+            });
+            log('✓ Event listeners working');
+        } catch (e) {
+            log('✗ Event listeners failed: ' + e.message, 'error');
+        }
+        
+        // Test 3: Right click
+        document.addEventListener('contextmenu', (e) => {
+            log('✓ Right click detected');
+            // Don't prevent default so you can still right-click
+        });
+        
+        // Test 4: WebGL
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (gl) {
+                log('✓ WebGL context available');
+            } else {
+                log('✗ WebGL not available', 'error');
+            }
+        } catch (e) {
+            log('✗ WebGL test failed: ' + e.message, 'error');
+        }
+        
+        log('=== Tests complete. Try right-clicking anywhere ===', 'success');
+    </script>
+</body>
+</html>
